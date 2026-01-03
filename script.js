@@ -53,7 +53,7 @@ class Player {
         ctx.shadowBlur = 15;
         ctx.shadowColor = this.color;
         ctx.fillStyle = this.color;
-        
+
         // Ship body (Triangle shape)
         ctx.beginPath();
         ctx.moveTo(this.x + this.width / 2, this.y);
@@ -70,7 +70,7 @@ class Player {
         ctx.lineTo(this.x + this.width / 2, this.y + this.height + 10);
         ctx.lineTo(this.x + this.width - 10, this.y + this.height);
         ctx.fill();
-        
+
         ctx.restore();
     }
 
@@ -85,15 +85,15 @@ class Player {
 
         this.shootTimer++;
         if (keys.Space && this.shootTimer > 15) {
-             projectiles.push(new Projectile(
-                 this.x + this.width / 2, 
-                 this.y, 
-                 -PROJECTILE_SPEED,
-                 this.color,
-                 true // isPlayer
-             ));
-             this.shootTimer = 0;
-             playSound('shoot');
+            projectiles.push(new Projectile(
+                this.x + this.width / 2,
+                this.y,
+                -PROJECTILE_SPEED,
+                this.color,
+                true // isPlayer
+            ));
+            this.shootTimer = 0;
+            playSound('shoot');
         }
     }
 }
@@ -112,12 +112,12 @@ class Projectile {
         ctx.save();
         ctx.shadowBlur = 10;
         ctx.shadowColor = this.color;
-        
+
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
-        
+
         // Trail effect
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
@@ -152,7 +152,7 @@ class Enemy {
         ctx.shadowBlur = 10;
         ctx.shadowColor = this.color;
         ctx.fillStyle = this.color;
-        
+
         // Simple pixel-art-ish shapes drawn with paths for smoothness
         const w = this.width;
         const h = this.height;
@@ -161,33 +161,33 @@ class Enemy {
 
         if (this.type % 3 === 0) {
             // "Crab" shape
-            ctx.fillRect(x, y + h/3, w, h/3); 
-            ctx.fillRect(x + w/4, y, w/2, h/3);
-            ctx.fillRect(x, y + h*0.66, w/4, h/3);
-            ctx.fillRect(x + w*0.75, y + h*0.66, w/4, h/3);
+            ctx.fillRect(x, y + h / 3, w, h / 3);
+            ctx.fillRect(x + w / 4, y, w / 2, h / 3);
+            ctx.fillRect(x, y + h * 0.66, w / 4, h / 3);
+            ctx.fillRect(x + w * 0.75, y + h * 0.66, w / 4, h / 3);
         } else if (this.type % 3 === 1) {
             // "Squid" shape
             ctx.beginPath();
-            ctx.moveTo(x + w/2, y);
-            ctx.lineTo(x + w, y + h/2);
-            ctx.lineTo(x + w*0.8, y + h);
-            ctx.lineTo(x + w*0.5, y + h*0.7);
-            ctx.lineTo(x + w*0.2, y + h);
-            ctx.lineTo(x, y + h/2);
+            ctx.moveTo(x + w / 2, y);
+            ctx.lineTo(x + w, y + h / 2);
+            ctx.lineTo(x + w * 0.8, y + h);
+            ctx.lineTo(x + w * 0.5, y + h * 0.7);
+            ctx.lineTo(x + w * 0.2, y + h);
+            ctx.lineTo(x, y + h / 2);
             ctx.fill();
         } else {
             // "UFO" shape
             ctx.beginPath();
-            ctx.ellipse(x + w/2, y + h/2, w/2, h/3, 0, 0, Math.PI * 2);
+            ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 3, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#fff';
-            ctx.fillRect(x + w/2 - 2, y + h/2 - 2, 4, 4);
+            ctx.fillRect(x + w / 2 - 2, y + h / 2 - 2, 4, 4);
         }
 
         ctx.restore();
     }
 
-    update({velocity}) {
+    update({ velocity }) {
         this.x += velocity.x;
         this.y += velocity.y;
     }
@@ -208,14 +208,20 @@ class Particle {
     constructor(x, y, color) {
         this.x = x;
         this.y = y;
-        this.radius = Math.random() * 2 + 1;
+        this.radius = Math.random() * 3 + 1; // Slightly larger
         this.color = color;
+
+        // Circular explosion pattern
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 6 + 2; // Speed 2-8
+
         this.velocity = {
-            x: (Math.random() - 0.5) * 5,
-            y: (Math.random() - 0.5) * 5
+            x: Math.cos(angle) * velocity,
+            y: Math.sin(angle) * velocity
         };
         this.alpha = 1;
-        this.decay = 0.02 + Math.random() * 0.03;
+        this.decay = 0.015 + Math.random() * 0.02; // Slower fade
+        this.friction = 0.95; // Slow down over time
     }
 
     draw() {
@@ -229,6 +235,8 @@ class Particle {
     }
 
     update() {
+        this.velocity.x *= this.friction;
+        this.velocity.y *= this.friction;
         this.x += this.velocity.x;
         this.y += this.velocity.y;
         this.alpha -= this.decay;
@@ -273,10 +281,10 @@ let enemyDirection = 1; // 1 for right, -1 for left
 function init() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    
+
     // Create Stars for background
     stars = [];
-    for(let i=0; i<50; i++) {
+    for (let i = 0; i < 50; i++) {
         stars.push(new Star());
     }
 
@@ -289,29 +297,30 @@ function resizeCanvas() {
     const container = document.querySelector('.game-container');
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
-    
+
     // If player exists, clamp position
     if (player) {
-         player.x = Math.min(player.x, canvas.width - player.width);
-         player.y = canvas.height - player.height - 20;
+        player.x = Math.min(player.x, canvas.width - player.width);
+        player.y = canvas.height - player.height - 20;
     }
 }
 
 function startGame() {
+    initAudio(); // Initialize Audio Context
     score = 0;
     level = 1;
     updateUI();
-    
+
     player = new Player();
     projectiles = [];
     particles = [];
-    
+
     createEnemies();
 
     gameActive = true;
     startScreen.classList.remove('active');
     gameOverScreen.classList.remove('active');
-    
+
     animate();
 }
 
@@ -321,7 +330,7 @@ function createEnemies() {
     const rows = 4;
     const padding = 15;
     const enemyWidth = 30; // Approx
-    
+
     // Calculate start X to center the block
     const blockWidth = cols * (enemyWidth + padding);
     let startX = (canvas.width - blockWidth) / 2;
@@ -336,7 +345,7 @@ function createEnemies() {
             ));
         }
     }
-    
+
     // Increase speed with level
     const speedMultiplier = 1 + (level - 1) * 0.2;
     enemyVelocity = { x: ENEMY_SPEED_BASE * speedMultiplier * enemyDirection, y: 0 };
@@ -361,7 +370,7 @@ function bindControls() {
 
     startBtn.addEventListener('click', startGame);
     restartBtn.addEventListener('click', startGame);
-    
+
     // Touch controls for mobile (simple tap sides)
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
@@ -370,7 +379,7 @@ function bindControls() {
         if (touchX < middle) keys.ArrowLeft = true;
         else keys.ArrowRight = true;
         keys.Space = true; // Auto shoot on mobile touch
-    }, {passive: false});
+    }, { passive: false });
 
     canvas.addEventListener('touchend', () => {
         keys.ArrowLeft = false;
@@ -379,10 +388,83 @@ function bindControls() {
     });
 }
 
+// --- Audio System ---
+
+let audioCtx;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
 function playSound(type) {
-    // Ideally use Web Audio API here, but keeping it silent/simple 
-    // unless requested to implement audio synthesis.
-    // Placeholder.
+    if (!audioCtx) return;
+
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    if (type === 'shoot') {
+        // Player shoot: Pew pew
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.1);
+
+        gainNode.gain.setValueAtTime(0.1, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+        osc.start(now);
+        osc.stop(now + 0.1);
+    }
+    else if (type === 'enemyShoot') {
+        // Enemy shoot: Lower pitch
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.1); // Slightly longer
+
+        gainNode.gain.setValueAtTime(0.05, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+        osc.start(now);
+        osc.stop(now + 0.1);
+    }
+    else if (type === 'explosion') {
+        // Explosion: noise-like effect using frequency modulation or just low square
+        // Simple "Boom" using low freq square wave decaying fast
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+        gainNode.gain.setValueAtTime(0.2, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+        osc.start(now);
+        osc.stop(now + 0.3);
+
+        // Add a second layer for punch
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+
+        osc2.type = 'square';
+        osc2.frequency.setValueAtTime(50, now);
+        osc2.frequency.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+        gain2.gain.setValueAtTime(0.2, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        osc2.start(now);
+        osc2.stop(now + 0.1);
+    }
 }
 
 // --- Main Loop ---
@@ -429,7 +511,7 @@ function animate() {
         enemyDirection *= -1;
         const speedMultiplier = 1 + (level - 1) * 0.2;
         enemyVelocity.x = ENEMY_SPEED_BASE * speedMultiplier * enemyDirection;
-        
+
         // Move down
         enemies.forEach(enemy => {
             enemy.y += 20;
@@ -450,12 +532,12 @@ function animate() {
         projectiles.forEach((p, pIndex) => {
             if (p.isPlayer && isColliding(p, enemy)) {
                 // Effects
-                createParticles(enemy.x + enemy.width/2, enemy.y + enemy.height/2, enemy.color);
-                
+                createParticles(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2, enemy.color);
+
                 // Remove
                 enemies.splice(index, 1);
                 projectiles.splice(pIndex, 1);
-                
+
                 // Score
                 score += 100;
                 updateUI();
@@ -470,14 +552,14 @@ function animate() {
 
         // Enemy reaches bottom
         if (enemy.y + enemy.height > player.y) {
-           endGame();
+            endGame();
         }
     });
 
     // Player hit by enemy projectile
     projectiles.forEach((p, pIndex) => {
         if (!p.isPlayer && isCollidingRectCircle(player, p)) {
-            createParticles(player.x + player.width/2, player.y + player.height/2, '#fff');
+            createParticles(player.x + player.width / 2, player.y + player.height / 2, '#fff');
             endGame();
         }
     });
@@ -526,10 +608,10 @@ function isColliding(circle, rect) {
 }
 
 function isCollidingRect(r1, r2) {
-    return !(r2.x > r1.x + r1.width || 
-             r2.x + r2.width < r1.x || 
-             r2.y > r1.y + r1.height || 
-             r2.y + r2.height < r1.y);
+    return !(r2.x > r1.x + r1.width ||
+        r2.x + r2.width < r1.x ||
+        r2.y > r1.y + r1.height ||
+        r2.y + r2.height < r1.y);
 }
 
 function isCollidingRectCircle(rect, circle) {
