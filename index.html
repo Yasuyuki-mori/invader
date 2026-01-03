@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Invaders</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="ui-layer">
+            <div class="header">
+                <div class="score-box">SCORE: <span id="score">0</span></div>
+                <div class="level-box">LEVEL: <span id="level">1</span></div>
+            </div>
+            
+            <div id="start-screen" class="overlay active">
+                <h1 class="title">NEON INVADERS</h1>
+                <p class="subtitle">Mission: Defend the Core</p>
+                <button id="start-btn" class="glow-btn">START MISSION</button>
+            </div>
+
+            <div id="game-over-screen" class="overlay">
+                <h1 class="title text-red">SYSTEM FAILURE</h1>
+                <p class="subtitle">Final Score: <span id="final-score">0</span></p>
+                <button id="restart-btn" class="glow-btn">REBOOT SYSTEM</button>
+            </div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
